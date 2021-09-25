@@ -53,8 +53,6 @@ void computeHash (const string& hashProgName) {
 		perror("read");
 		exit(-1);
 	}
-
-	fprintf(stderr, "ComputeHash received a string from the parent: %s\n", fileNameRecv);
 	
 	/* Glue together a command line <PROGRAM NAME>. 
  	 * For example, sha512sum fileName.
@@ -66,7 +64,7 @@ void computeHash (const string& hashProgName) {
     /** TODO: Open the pipe to the program (specified in cmdLine) 
 	* using popen() and save the ouput into hashValue. See popen.cpp
     * for examples using popen. */
-   	FILE* progOutput = popen(cmdLine);
+   	FILE* progOutput = popen(cmdLine.c_str(), "r");
 
 	/* Make sure that popen succeeded */
 	if (!progOutput) {
@@ -162,15 +160,6 @@ int main (int argc, char** argv) {
 				perror("close");
 				exit(-1);
 			}
-
-			fprintf(stderr, "Child sending a string to ComputeHash: %s\n", fileName);
-
-			/* Send the string to the child */
-			// WRITING
-			if (write(childToParentPipe[WRITE_END], fileName, sizeof(fileName)) < 0) {
-				perror("write");
-				exit(-1);
-			}
 					
 			/* Compute the hash */
 			computeHash(hashProgs[hashAlgNum]);
@@ -199,11 +188,9 @@ int main (int argc, char** argv) {
 		memset(hashValue, (char)NULL, HASH_VALUE_LENGTH);
 			
 		/** TODO: Send the string to the child */
-		fprintf(stderr, "Parent sending a string to Child: %s\n", fileName);
-
 		/* Send the string to the child */
 		// WRITING 
-		if (write(parentToChildPipe[WRITE_END], fileName, MAX_FILE_NAME_LENGTH) < 0) {
+		if (write(parentToChildPipe[WRITE_END], fileName.c_str(), MAX_FILE_NAME_LENGTH) < 0) {
 			perror("write");
 			exit(-1);
 		}
@@ -211,16 +198,8 @@ int main (int argc, char** argv) {
 		/** TODO: Read the string sent by the child */
 		/* Read the string sent by the child */
 		// READING
-		if (read(childToParentPipe[READ_END], fileName, MAX_FILE_NAME_LENGTH) < 0) {
+		if (read(childToParentPipe[READ_END], hashValue, MAX_FILE_NAME_LENGTH) < 0) {
 			perror("read");
-			exit(-1);
-		}
-
-		fprintf(stderr, "Parent received a string from the child: %s\n\n", fileName);
-
-		/* Read the program output into the buffer */
-		if (fread(hashValue, sizeof(char), sizeof(char) * HASH_VALUE_LENGTH, fileName) < 0) {
-			perror("fread");
 			exit(-1);
 		}
 
@@ -235,6 +214,6 @@ int main (int argc, char** argv) {
 		}
 	}
 
-	cout << "\nProgram Ending...\n";
+	cout << "Program Ending...\n";
 	return 0;
 }
