@@ -61,9 +61,9 @@ void computeHash (const string& hashProgName) {
 	cmdLine += " ";
 	cmdLine += fileNameRecv;	
 	
-    /** TODO: Open the pipe to the program (specified in cmdLine) 
+    	/** TODO: Open the pipe to the program (specified in cmdLine) 
 	* using popen() and save the ouput into hashValue. See popen.cpp
-    * for examples using popen. */
+    	* for examples using popen. */
    	FILE* progOutput = popen(cmdLine.c_str(), "r");
 
 	/* Make sure that popen succeeded */
